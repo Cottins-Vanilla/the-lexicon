@@ -1,0 +1,20 @@
+# Screenshots and local captures
+shots/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Temporary files
+.tmp/
+tmp/
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# OS / editor metadata
+.DS_Store
+Thumbs.db

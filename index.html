@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080c0e">
+  <title>词匣 · The Lexicon</title>
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/library.css">
+  <link rel="stylesheet" href="styles/study.css">
+  <link rel="stylesheet" href="styles/overlays.css">
+</head>
+<body>
+  <div class="scene" aria-hidden="true">
+    <div class="sun-glow"></div>
+    <div class="mist mist-a"></div>
+    <div class="mist mist-b"></div>
+    <div class="orbit">
+      <span class="orbit-ticks"></span>
+      <span class="orbit-num n1">XII</span>
+      <span class="orbit-num n2">III</span>
+      <span class="orbit-num n3">VI</span>
+      <span class="orbit-num n4">IX</span>
+      <span class="orbit-star"></span>
+    </div>
+    <div class="axis axis-v"></div>
+    <div class="axis axis-h"></div>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="view-curtain" id="viewCurtain" aria-hidden="true"></div>
+
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="back-btn" id="backBtn" hidden aria-label="返回词库">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg>
+          <span>词库</span>
+        </button>
+        <button type="button" class="brand" id="brandHome" aria-label="回到词库">
+          <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="21.5" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width=".8"/>
+            <circle cx="24" cy="24" r="16.5" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width=".7"/>
+            <path d="M24 7v34M7 24h34" stroke="currentColor" stroke-opacity=".16" stroke-width=".7"/>
+            <path d="M24 12.5l2.45 6.05L33 24l-6.55 5.45L24 35.5l-2.45-6.05L15 24l6.55-5.45z" fill="currentColor" fill-opacity=".82"/>
+            <path d="M24 18.4l1.05 2.55L28.6 24l-3.55 3.05L24 29.6l-1.05-2.55L19.4 24l3.55-3.05z" fill="#0b1113"/>
+          </svg>
+          <span class="brand-copy">
+            <span class="brand-cn">词匣</span>
+            <span class="brand-en">THE LEXICON</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="topbar-center" aria-live="polite">
+        <span class="topbar-kicker" id="topbarKicker">THE ARCHIVE</span>
+        <span class="topbar-title" id="topbarTitle">词库</span>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" class="icon-button sound-toggle" id="soundToggle" aria-label="关闭音效" aria-pressed="true" title="音效：开">
+          <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5v5h3.2L12 18V6L7.2 9.5H4z"/>
+            <path d="M15.2 9.2a4 4 0 010 5.6M17.7 6.8a7.2 7.2 0 010 10.4"/>
+          </svg>
+          <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.5v5h3.2L12 18V6L7.2 9.5H4z"/>
+            <path d="M15.4 9.6l5 5M20.4 9.6l-5 5"/>
+          </svg>
+        </button>
+        <button type="button" class="icon-button music-toggle" id="musicToggle" data-open-music aria-label="打开本地音乐" aria-haspopup="dialog" title="本地音乐">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9.2 17.7V6.6l9.1-2v10.8"/>
+            <circle cx="6.7" cy="17.9" r="2.5"/>
+            <circle cx="15.8" cy="15.4" r="2.5"/>
+          </svg>
+        </button>
+        <button type="button" class="icon-button" id="ledgerOpen" aria-label="打开记诵档案" aria-haspopup="dialog" title="记诵档案">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 4.5h14v15H5z"/>
+            <path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="view library-view" id="libraryView">
+      <div class="library-scroll">
+        <section class="library-hero">
+          <div class="hero-copy">
+            <div class="kicker"><span class="kicker-rule"></span>THE WORD ARCHIVE</div>
+            <h1 class="hero-title">
+              <span class="hero-title-cn">词库</span>
+              <em class="hero-title-en">THE LIBRARY OF WORDS</em>
+            </h1>
+            <p class="hero-desc">在文件夹与单词本之间，找到今天要记住的那一页。<br>每一次选择，都会留下自己的阅读轨迹。</p>
+
+            <div class="library-tools">
+              <label class="search-field" for="bookSearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="6.2"/>
+                  <path d="M15.2 15.2L21 21"/>
+                </svg>
+                <input id="bookSearch" type="search" placeholder="搜索单词本 / SEARCH WORD BOOKS" autocomplete="off" spellcheck="false">
+                <button type="button" class="search-clear" id="searchClear" hidden aria-label="清除搜索">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>
+                </button>
+              </label>
+              <span class="search-status" id="searchStatus">共 5 本单词本</span>
+            </div>
+          </div>
+
+          <aside class="hero-plate" aria-hidden="true">
+            <div class="hero-art" id="heroArt"></div>
+            <div class="hero-plate-label">
+              <span>COLLECTED WORDS</span>
+              <strong>VOL. IX</strong>
+              <i></i>
+            </div>
+          </aside>
+        </section>
+
+        <section class="shelf shelf-folders">
+          <div class="shelf-head">
+            <div class="shelf-title-group">
+              <span class="shelf-num">01</span>
+              <div>
+                <h2>文件夹</h2>
+                <p>FOLDERS · 点击文件夹，展开其中的单词本</p>
+              </div>
+            </div>
+            <button type="button" class="line-btn" id="newFolderBtn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              新建文件夹
+            </button>
+          </div>
+          <div class="rail-shell">
+            <button type="button" class="rail-arrow is-left" data-rail="folders" data-direction="-1" aria-label="向左滚动文件夹">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="rail folder-rail" id="folderRail"></div>
+            <button type="button" class="rail-arrow is-right" data-rail="folders" data-direction="1" aria-label="向右滚动文件夹">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <section class="shelf shelf-books">
+          <div class="shelf-head">
+            <div class="shelf-title-group">
+              <span class="shelf-num">02</span>
+              <div>
+                <h2 id="bookSectionTitle">单词本</h2>
+                <p id="bookSectionKicker">WORD BOOKS · 选择一本，开始今天的记诵</p>
+              </div>
+            </div>
+            <button type="button" class="line-btn" id="newBookBtn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              新建单词本
+            </button>
+          </div>
+          <div class="rail-shell">
+            <button type="button" class="rail-arrow is-left" data-rail="books" data-direction="-1" aria-label="向左滚动单词本">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="rail book-rail" id="bookRail"></div>
+            <button type="button" class="rail-arrow is-right" data-rail="books" data-direction="1" aria-label="向右滚动单词本">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <footer class="library-footer">
+          <div class="library-stats">
+            <span><b id="statFolders">0</b> 个文件夹</span>
+            <i></i>
+            <span><b id="statBooks">0</b> 本单词本</span>
+            <i></i>
+            <span><b id="statWords">0</b> 个词条</span>
+            <i></i>
+            <span><b id="statKnown">0</b> 个已斩</span>
+          </div>
+          <p>选择文件夹展开藏书 · 打开单词本开始记诵 · 所有变更自动保存</p>
+        </footer>
+      </div>
+    </main>
+
+    <main class="view study-view" id="studyView" hidden>
+      <section class="study-heading">
+        <div class="study-heading-copy">
+          <div class="study-kicker" id="studyKicker">WORD BOOK</div>
+          <h1 class="study-book-title" id="studyBookTitle">单词本</h1>
+          <p class="study-book-desc" id="studyBookDesc"></p>
+        </div>
+        <div class="study-actions">
+          <button type="button" class="line-btn" id="manageBookBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v13H6.5a1.5 1.5 0 010-3H19"/><path d="M8.5 9h7"/></svg>
+            词条册
+          </button>
+          <button type="button" class="primary-btn" id="addWordBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            新增词条
+          </button>
+        </div>
+      </section>
+
+      <div class="study-stage" id="studyStage">
+        <div class="study-content" id="studyContent">
+          <div class="study-meta-line">
+            <span class="study-position" id="studyPosition">— / —</span>
+            <span class="priority-tag" id="priorityTag">NEW · 新词</span>
+            <span class="study-meta-divider"></span>
+            <span class="study-queue">QUEUE · 依稀优先</span>
+          </div>
+
+          <div class="study-word-area">
+            <div class="study-word-frame" id="wordFrame">
+              <h1 class="study-word" id="wordEl">solitude</h1>
+              <span class="slash-line" aria-hidden="true"></span>
+              <span class="slash-seal" aria-hidden="true">斩</span>
+            </div>
+
+            <div class="study-lex">
+              <span class="pos" id="pos">n.</span>
+              <span class="phonetic" id="phonetic">/ˈsɒlɪtjuːd/</span>
+              <button type="button" class="speak-btn" id="speakBtn" aria-label="朗读当前单词" title="朗读单词">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9.5v5h3.2L12 18V6L7.2 9.5H4z"/>
+                  <path d="M15.2 9.2a4 4 0 010 5.6M17.7 6.8a7.2 7.2 0 010 10.4"/>
+                </svg>
+              </button>
+              <span class="lex-divider" aria-hidden="true"></span>
+              <span class="meaning" id="meaning">独处 · 孤独</span>
+            </div>
+          </div>
+
+          <div class="study-ornament" aria-hidden="true"><span></span><i></i><span></span></div>
+
+          <figure class="study-context">
+            <div class="context-label"><span>IN CONTEXT</span><span>语境</span></div>
+            <blockquote id="sentence">I have never found a companion that was so companionable as solitude.</blockquote>
+            <p class="translation" id="translation">我从未找到过比独处更合意的伴侣。</p>
+            <figcaption class="source">
+              <span class="source-main" id="source">WALDEN · HENRY DAVID THOREAU</span>
+              <span class="source-note" id="sourceNote">亨利·戴维·梭罗《瓦尔登湖》</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="study-empty" id="studyEmpty" hidden>
+          <div class="empty-sigil" aria-hidden="true">✦</div>
+          <h2 id="emptyTitle">这本单词本还没有词条</h2>
+          <p id="emptyText">把想记住的词写进这一页，然后开始第一轮记诵。</p>
+          <div class="empty-actions">
+            <button type="button" class="primary-btn" id="emptyPrimary">添加第一个词条</button>
+            <button type="button" class="line-btn" id="emptySecondary">返回词库</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="study-console" id="studyConsole">
+        <div class="queue-block">
+          <div class="queue-head">
+            <span class="queue-label">QUEUE <em>· 本轮队列</em></span>
+            <span class="queue-progress" id="queueProgress">— / —</span>
+          </div>
+          <div class="queue-bar" aria-hidden="true"><span id="queueBarFill"></span></div>
+          <div class="queue-legend">
+            <span class="legend-item"><i class="dot dot-fuzzy"></i>依稀 <b id="studyFuzzy">0</b></span>
+            <span class="legend-item"><i class="dot dot-unknown"></i>未识 <b id="studyUnknown">0</b></span>
+            <span class="legend-item"><i class="dot dot-fresh"></i>新词 <b id="studyFresh">0</b></span>
+            <span class="legend-item is-known"><i class="dot dot-known"></i>已斩 <b id="studyKnown">0</b></span>
+          </div>
+        </div>
+
+        <div class="study-actions-main" id="studyActions">
+          <button type="button" class="step-btn prev" id="prevBtn" aria-label="上一个单词">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+            <span>上一个</span>
+          </button>
+
+          <div class="rating-group" aria-label="记忆程度">
+            <button type="button" class="rate-btn" data-rate="unknown">
+              <span class="zh">未识</span>
+              <span class="en">AGAIN</span>
+            </button>
+            <button type="button" class="rate-btn" data-rate="fuzzy">
+              <span class="zh">依稀</span>
+              <span class="en">FUZZY</span>
+            </button>
+            <button type="button" class="rate-btn" data-rate="known" title="完全会" aria-label="斩 · 完全会">
+              <span class="zh">斩</span>
+              <span class="en">KNOWN</span>
+            </button>
+          </div>
+
+          <button type="button" class="step-btn next" id="nextBtn" aria-label="下一个单词">
+            <span>下一个</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+
+        <div class="study-side">
+          <span class="autosave"><i></i>自动保存至本地</span>
+          <span class="keys"><kbd>←</kbd><kbd>→</kbd> 切换 · <kbd>K</kbd> 斩 · <kbd>F</kbd> 依稀</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="modal-dialog compact-dialog" id="folderDialog" aria-labelledby="folderDialogTitle">
+    <div class="modal-shell">
+      <header class="modal-head">
+        <div>
+          <div class="kicker"><span class="kicker-rule"></span>NEW FOLDER</div>
+          <h2 class="modal-title" id="folderDialogTitle">新建文件夹</h2>
+          <p class="modal-sub">为一个主题留出位置，再把单词本放进去。</p>
+        </div>
+        <button type="button" class="dialog-close" data-close aria-label="关闭新建文件夹">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <form class="modal-form" id="folderForm" novalidate>
+        <label class="field">
+          <span class="field-head"><span>文件夹名称<i>*</i></span><em>FOLDER NAME</em></span>
+          <input type="text" name="name" id="folderName" maxlength="40" placeholder="例如：夜航手记" autocomplete="off">
+          <span class="field-error" id="folderError"></span>
+        </label>
+        <label class="field">
+          <span class="field-head"><span>英文小标题</span><em>SUBTITLE</em></span>
+          <input type="text" name="subtitle" id="folderSubtitle" maxlength="80" placeholder="例如：NOCTURNAL NOTES" autocomplete="off">
+        </label>
+        <label class="field">
+          <span class="field-head"><span>一句说明</span><em>DESCRIPTION</em></span>
+          <input type="text" name="description" id="folderDescription" maxlength="160" placeholder="这个文件夹收藏什么？" autocomplete="off">
+        </label>
+        <div class="modal-actions">
+          <p class="modal-note">文件夹本身不会上传，所有内容保存在本机浏览器。</p>
+          <div class="button-row">
+            <button type="button" class="line-btn" data-close>取消</button>
+            <button type="submit" class="primary-btn">创建文件夹</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog class="modal-dialog compact-dialog" id="bookDialog" aria-labelledby="bookDialogTitle">
+    <div class="modal-shell">
+      <header class="modal-head">
+        <div>
+          <div class="kicker"><span class="kicker-rule"></span>NEW WORD BOOK</div>
+          <h2 class="modal-title" id="bookDialogTitle">新建单词本</h2>
+          <p class="modal-sub">给一组词取一个名字，收进合适的文件夹。</p>
+        </div>
+        <button type="button" class="dialog-close" data-close aria-label="关闭新建单词本">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <form class="modal-form" id="bookForm" novalidate>
+        <label class="field">
+          <span class="field-head"><span>单词本名称<i>*</i></span><em>BOOK NAME</em></span>
+          <input type="text" name="name" id="bookName" maxlength="40" placeholder="例如：雨夜短句" autocomplete="off">
+          <span class="field-error" id="bookError"></span>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span class="field-head"><span>英文小标题</span><em>SUBTITLE</em></span>
+            <input type="text" name="subtitle" id="bookSubtitle" maxlength="80" placeholder="例如：RAIN NOTES" autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="field-head"><span>放入文件夹<i>*</i></span><em>FOLDER</em></span>
+            <select name="folderId" id="bookFolder"></select>
+          </label>
+        </div>
+        <label class="field">
+          <span class="field-head"><span>一句说明</span><em>DESCRIPTION</em></span>
+          <input type="text" name="description" id="bookDescription" maxlength="160" placeholder="例如：写在雨声里的词。" autocomplete="off">
+        </label>
+        <div class="modal-actions">
+          <p class="modal-note">创建后会立即打开这本单词本，可以从第一个词开始。</p>
+          <div class="button-row">
+            <button type="button" class="line-btn" data-close>取消</button>
+            <button type="submit" class="primary-btn">创建并打开</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog class="modal-dialog entry-dialog" id="entryDialog" aria-labelledby="entryDialogTitle">
+    <div class="modal-shell entry-shell">
+      <header class="modal-head">
+        <div>
+          <div class="kicker"><span class="kicker-rule"></span>NEW WORD</div>
+          <h2 class="modal-title" id="entryDialogTitle">新增词条</h2>
+          <p class="modal-sub" id="entryBookLabel">收入单词本</p>
+        </div>
+        <button type="button" class="dialog-close" data-close aria-label="关闭新增词条">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <form class="modal-form entry-form" id="entryForm" novalidate>
+        <div class="form-grid">
+          <label class="field full word-field" data-field="word">
+            <span class="field-head"><span>单词<i>*</i></span><em>WORD</em></span>
+            <input type="text" name="word" id="entryWord" maxlength="64" placeholder="例如：serendipity" autocomplete="off" spellcheck="false">
+            <span class="field-error"></span>
+          </label>
+          <label class="field" data-field="phonetic">
+            <span class="field-head"><span>音标</span><em>PRONUNCIATION</em></span>
+            <input type="text" name="phonetic" maxlength="80" placeholder="/ˌserənˈdɪpəti/" autocomplete="off" spellcheck="false">
+            <span class="field-error"></span>
+          </label>
+          <label class="field" data-field="pos">
+            <span class="field-head"><span>词性</span><em>PART OF SPEECH</em></span>
+            <input type="text" name="pos" maxlength="16" placeholder="n. / v. / adj." autocomplete="off">
+            <span class="field-error"></span>
+          </label>
+          <label class="field full" data-field="meaning">
+            <span class="field-head"><span>释义<i>*</i></span><em>MEANING</em></span>
+            <input type="text" name="meaning" maxlength="120" placeholder="意外发现珍奇事物的本领" autocomplete="off">
+            <span class="field-error"></span>
+          </label>
+          <label class="field full" data-field="sentence">
+            <span class="field-head"><span>例句<i>*</i></span><em>SENTENCE</em></span>
+            <textarea name="sentence" maxlength="600" rows="3" placeholder="写一句让你记住这个词的话。"></textarea>
+            <span class="field-error"></span>
+          </label>
+          <label class="field full" data-field="translation">
+            <span class="field-head"><span>译文</span><em>TRANSLATION</em></span>
+            <input type="text" name="translation" maxlength="400" placeholder="例句的中文翻译（选填）" autocomplete="off">
+            <span class="field-error"></span>
+          </label>
+          <label class="field full" data-field="source">
+            <span class="field-head"><span>出处</span><em>SOURCE</em></span>
+            <input type="text" name="source" maxlength="160" placeholder="例如：自撰例句 / 亨利·戴维·梭罗《瓦尔登湖》" autocomplete="off">
+            <span class="field-error"></span>
+          </label>
+        </div>
+        <div class="modal-actions entry-actions">
+          <p class="modal-note">保存后会加入当前单词本。所有内容只保存在本机。</p>
+          <div class="button-row">
+            <button type="button" class="line-btn" data-close>取消</button>
+            <button type="submit" class="primary-btn">收入词匣</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog class="drawer-dialog" id="manageDialog" aria-labelledby="manageTitle">
+    <div class="drawer-shell">
+      <header class="drawer-head">
+        <div>
+          <div class="kicker"><span class="kicker-rule"></span>WORD INDEX</div>
+          <h2 class="modal-title" id="manageTitle">词条册</h2>
+          <p class="modal-sub" id="manageMeta">管理这本单词本里的所有词条。</p>
+        </div>
+        <button type="button" class="dialog-close" data-close aria-label="关闭词条册">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <div class="drawer-toolbar">
+        <label class="mini-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2L21 21"/></svg>
+          <input type="search" id="manageSearch" placeholder="筛选词条" autocomplete="off">
+        </label>
+        <button type="button" class="primary-btn small" id="manageAddBtn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          新增词条
+        </button>
+      </div>
+      <div class="drawer-scroll">
+        <div class="manage-list" id="manageList"></div>
+      </div>
+      <footer class="drawer-foot">
+        <span id="manageCount">0 个词条</span>
+        <button type="button" class="quiet-btn" id="manageExportBtn">导出词条 <small>JSON</small></button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="drawer-dialog" id="ledgerDialog" aria-labelledby="ledgerTitle">
+    <div class="drawer-shell">
+      <header class="drawer-head">
+        <div>
+          <div class="kicker"><span class="kicker-rule"></span>THE LEDGER</div>
+          <h2 class="modal-title" id="ledgerTitle">记诵档案</h2>
+          <p class="modal-sub">依稀与未识会留在这里；已斩词条只移出队列，不计入记录。</p>
+        </div>
+        <button type="button" class="dialog-close" data-close aria-label="关闭记诵档案">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <div class="drawer-scroll">
+        <div class="ledger-stats">
+          <div><strong id="ledgerTotal">0</strong><span>温习记录</span></div>
+          <div><strong id="ledgerFuzzy">0</strong><span>依稀</span></div>
+          <div><strong id="ledgerUnknown">0</strong><span>未识</span></div>
+          <div><strong id="ledgerBooks">0</strong><span>涉及单词本</span></div>
+        </div>
+        <div class="activity-list" id="activityList"></div>
+      </div>
+      <footer class="drawer-foot">
+        <span>只记录依稀与未识</span>
+        <button type="button" class="quiet-btn" id="exportBtn">导出全部数据 <small>JSON</small></button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="modal-dialog music-dialog" id="musicDialog" aria-labelledby="musicTitle">
+    <div class="modal-shell music-shell" id="musicShell">
+      <header class="modal-head">
+        <div>
+          <div class="kicker"><span class="kicker-rule"></span>THE GRAMOPHONE</div>
+          <h2 class="modal-title" id="musicTitle">本地音乐</h2>
+          <p class="modal-sub">放一张自己的唱片，让这间记诵室有声音。</p>
+        </div>
+        <button type="button" class="dialog-close" data-close aria-label="关闭本地音乐">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+
+      <div class="music-body">
+        <div class="music-track" id="musicTrack">
+          <div class="record-disc" aria-hidden="true"></div>
+          <div class="track-info">
+            <span class="track-label">LOCAL RECORD</span>
+            <strong class="track-name" id="trackName">尚未放入唱片</strong>
+            <span class="track-meta" id="trackMeta">选择或拖入本地音频</span>
+          </div>
+          <button type="button" class="choose-music" id="chooseMusicBtn">选择音乐</button>
+          <input type="file" id="musicInput" accept="audio/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.webm,.opus" hidden>
+        </div>
+
+        <div class="music-playbar">
+          <button type="button" class="music-play" id="musicPlayBtn" aria-label="播放音乐" disabled>
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5h3.4v13H7zM13.6 5.5H17v13h-3.4z"/></svg>
+          </button>
+          <div class="music-progress">
+            <div class="music-times"><span id="musicCurrent">00:00</span><span id="musicDuration">--:--</span></div>
+            <input type="range" class="range-control" id="musicSeek" min="0" max="1000" value="0" step="1" aria-label="音乐播放进度" disabled>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-head"><span class="setting-name">音乐音量 <small>MUSIC VOLUME</small></span><span class="setting-value" id="musicVolumeValue">55%</span></div>
+          <input type="range" class="range-control" id="musicVolume" min="0" max="100" value="55" step="1" aria-label="音乐音量">
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-head"><span class="setting-name">音效音量 <small>SOUND VOLUME</small></span><span class="setting-value" id="sfxVolumeValue">72%</span></div>
+          <input type="range" class="range-control" id="sfxVolume" min="0" max="100" value="72" step="1" aria-label="音效音量">
+        </div>
+
+        <div class="music-extras">
+          <label class="loop-control"><input type="checkbox" id="musicLoop" checked> 循环播放</label>
+          <button type="button" class="clear-music" id="clearMusicBtn" disabled>移除音乐</button>
+        </div>
+
+        <p class="music-help">音乐文件只留在本机，不会上传；刷新页面后需要重新选择。<br>音效总开关在页面右上角的扬声器按钮。</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal-dialog confirm-dialog" id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="modal-shell confirm-shell">
+      <div class="kicker"><span class="kicker-rule"></span>CONFIRM</div>
+      <h2 class="modal-title" id="confirmTitle">确认操作</h2>
+      <p class="confirm-message" id="confirmMessage"></p>
+      <div class="button-row confirm-actions">
+        <button type="button" class="line-btn" id="confirmCancel">取消</button>
+        <button type="button" class="danger-btn" id="confirmOk">确认删除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <audio id="musicAudio" loop preload="metadata"></audio>
+
+  <script src="scripts/seed.js"></script>
+  <script src="scripts/art.js"></script>
+  <script src="scripts/store.js"></script>
+  <script src="scripts/audio.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,894 @@
+//AUTHOR: Clottins
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>重返未来1999 - UI</title>
+  <style>
+    /* 导入字体：思源宋体用于中文，Cinzel用于西文装饰，Inter用于数字和细节 */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap');
+
+    /* 全局重置：移除内外边距，使用怪异盒模型 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* CSS变量：定义深色主题的颜色和关键尺寸 */
+    :root {
+      --bg-deep: #0a0e13;
+      /* 深色背景主色调 */
+      --text-primary: #e8e0d5;
+      /* 主要文字颜色：米白色 */
+      --text-secondary: #8a8a8a;
+      /* 次要文字颜色：灰色 */
+      --text-gold: #c9b8a0;
+      /* 金色，用于强调和装饰 */
+      --accent: #c4785a;
+      /* 强调色：陶土红 */
+      --panel-width: 38%;
+      /* 右侧详情面板宽度 */
+      --item-width: 240px;
+      /* 时间线上每个章节项的宽度 */
+    }
+
+    /* 基础样式：全屏，深色背景，隐藏溢出 */
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      overflow: hidden;
+      /* 禁止页面滚动，只滚动时间线 */
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* 背景图层：复杂径向渐变和线性渐变，营造深邃氛围 */
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(40, 55, 70, 0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(20, 25, 35, 0.6) 0%, transparent 50%),
+        linear-gradient(180deg, #0d1218 0%, #070a0f 40%, #0a0e15 100%);
+      z-index: 0;
+    }
+
+    /* 背景网格装饰：利用重复线性渐变制作细线网格 */
+    .bg-layer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(255, 255, 255, 0.02) 50px),
+        repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255, 255, 255, 0.02) 50px);
+      opacity: 0.3;
+      /* 径向渐变遮罩，让网格只出现在画面中央区域 */
+      mask-image: radial-gradient(circle at 30% 50%, black 0%, transparent 70%);
+      -webkit-mask-image: radial-gradient(circle at 30% 50%, black 0%, transparent 70%);
+    }
+
+    /* 顶部栏：绝对定位，透明背景，无鼠标事件穿透 */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 30;
+      pointer-events: none;
+      /* 让容器不拦截点击，但内部按钮需要重新启用 */
+    }
+
+    .top-left,
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      pointer-events: all;
+      /* 内部按钮可点击 */
+    }
+
+    /* 图标按钮样式：毛玻璃效果，带细微边框动画 */
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .icon-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .icon-btn:hover::after {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-primary);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    /* 资源显示组：显示游戏内资源（时间、代币等），带毛玻璃效果 */
+    .resource-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(12px);
+      padding: 6px 16px;
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .resource-group::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(201, 184, 160, 0.1);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    .resource-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--text-gold);
+      letter-spacing: 0.5px;
+    }
+
+    .resource-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.8;
+    }
+
+    /* ========= 右侧详情面板 ========= */
+    .right-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: var(--panel-width);
+      height: 100%;
+      /* 深色渐变毛玻璃背景 */
+      background: linear-gradient(180deg,
+          rgba(10, 14, 20, 0.95) 0%,
+          rgba(12, 16, 24, 0.92) 30%,
+          rgba(8, 10, 15, 0.98) 100%);
+      backdrop-filter: blur(30px) saturate(1.2);
+      z-index: 15;
+      padding: 160px 48px 140px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      /* 默认隐藏，通过 .active 类控制滑入 */
+      transform: translateX(100%);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: -60px 0 100px rgba(0, 0, 0, 0.5);
+    }
+
+    .right-panel.active {
+      transform: translateX(0);
+      /* 滑入视图 */
+    }
+
+    /* 左侧阴影渐变，让面板边缘融入背景 */
+    .right-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120px;
+      width: 120px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(10, 14, 20, 0.9));
+      pointer-events: none;
+    }
+
+    /* 面板内容动画：淡入上浮 */
+    .panel-content {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+    }
+
+    .right-panel.active .panel-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 章节元信息：标签 + 编号 */
+    .chapter-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      font-weight: 400;
+    }
+
+    .chapter-number {
+      font-family: 'Cinzel', serif;
+      font-size: 64px;
+      font-weight: 400;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: -2px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 章节标题：由多个不同大小的文字块组成 */
+    .chapter-title {
+      margin-bottom: 12px;
+      letter-spacing: 4px;
+      text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 2;
+      /* 注意：此处缺少单位，但浏览器会忽略，实际使用margin-right控制间隙 */
+      line-height: 1.3;
+    }
+
+    .chapter-title span {
+      margin-right: 2px;
+      /* 统一固定间隙 */
+    }
+
+    .chapter-title span:last-child {
+      margin-right: 0;
+    }
+
+    /* 标题不同尺寸的样式 */
+    .title-big {
+      font-size: 42px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .title-mid {
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .title-small {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text-primary);
+    }
+
+    /* 章节副标题：西文装饰线 */
+    .chapter-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: var(--text-secondary);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(201, 184, 160, 0.15);
+      position: relative;
+    }
+
+    .chapter-subtitle::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 60px;
+      height: 1px;
+      background: rgba(201, 184, 160, 0.4);
+    }
+
+    /* 章节描述文本 */
+    .chapter-desc {
+      font-size: 16px;
+      line-height: 1.8;
+      color: rgba(232, 224, 213, 0.75);
+      max-width: 90%;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    /* “无奖励”提示装饰 */
+    .no-reward {
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 3px;
+      opacity: 0.7;
+    }
+
+    .no-reward::before,
+    .no-reward::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      max-width: 80px;
+    }
+
+    /* ========= 底部时间线（水平滚动选择器） ========= */
+    .timeline-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      padding: 0 0 40px 0;
+      /* 渐变遮罩，让时间线底部淡出 */
+      background: linear-gradient(to top, rgba(5, 7, 10, 0.95) 0%, rgba(5, 7, 10, 0.6) 60%, transparent 100%);
+      overflow-x: auto;
+      /* 水平滚动 */
+      overflow-y: hidden;
+      cursor: grab;
+      /* 手型，支持拖拽滚动 */
+      -webkit-overflow-scrolling: touch;
+
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+    }
+
+    .timeline-container::-webkit-scrollbar {
+      display: none;
+      /* 隐藏滚动条，保持视觉干净 */
+    }
+
+    .timeline-container:active {
+      cursor: grabbing;
+    }
+
+    /* 轨道：弹性布局，内容不换行，右侧留出巨大空白以允许最后一个章节滚动到合适位置 */
+    .timeline-track {
+      position: relative;
+      height: 140px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      gap: 0;
+      /* 关键：右侧内边距 = 面板宽度 + 额外空间，确保最右侧章节也能居中 */
+      padding: 0 calc(var(--panel-width) + 200px) 0 18%;
+      min-width: max-content;
+    }
+
+    /* 时间线标尺（辅助线） */
+    .timeline-ruler {
+      position: absolute;
+      bottom: 20px;
+      left: 18%;
+      right: calc(var(--panel-width) + 200px);
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* 单个时间节点项 */
+    .timeline-item {
+      position: relative;
+      flex: 0 0 var(--item-width);
+      padding: 0 20px 32px;
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-origin: bottom center;
+      text-align: center;
+    }
+
+    /* 底部圆点装饰 */
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0);
+    }
+
+    .timeline-item:hover::before {
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+    }
+
+    /* 激活状态圆点：强调色 + 发光 */
+    .timeline-item.active::before {
+      background: var(--accent);
+      box-shadow: 0 0 20px rgba(196, 120, 90, 0.4);
+    }
+
+    /* 非激活且非当前章节：变暗、缩小、去色 */
+    .timeline-item.dimmed {
+      opacity: 0.3;
+      transform: scale(0.85);
+      filter: grayscale(0.6);
+    }
+
+    .timeline-item:not(.active):not(.dimmed) {
+      opacity: 0.6;
+    }
+
+    /* 章节数字样式 */
+    .timeline-number {
+      font-family: 'Cinzel', serif;
+      font-size: 28px;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+      transition: all 0.4s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-item.active .timeline-number {
+      font-size: 36px;
+      color: var(--text-gold);
+      text-shadow: 0 0 30px rgba(201, 184, 160, 0.3);
+    }
+
+    .timeline-item.dimmed .timeline-number {
+      font-size: 22px;
+    }
+
+    /* 星星图标，用于标记重要章节或已读 */
+    .star-icon {
+      width: 14px;
+      height: 14px;
+      fill: var(--accent);
+      opacity: 0.8;
+    }
+
+    .timeline-title {
+      font-size: 18px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: 2px;
+      transition: all 0.4s ease;
+    }
+
+    .timeline-item.active .timeline-title {
+      font-size: 22px;
+      color: var(--text-gold);
+      letter-spacing: 3px;
+    }
+
+    .timeline-item.dimmed .timeline-title {
+      font-size: 15px;
+    }
+
+    .timeline-sub {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+
+    .timeline-time {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    /* ========= 开始行动按钮 ========= */
+    .start-btn {
+      position: absolute;
+      bottom: 40px;
+      right: 48px;
+      z-index: 25;
+      padding: 16px 48px;
+      background: rgba(196, 120, 90, 0.9);
+      backdrop-filter: blur(10px);
+      border: none;
+      color: #0a0e13;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      /* 斜角切边效果 */
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+
+    .start-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .start-btn:hover {
+      background: rgba(212, 149, 122, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(196, 120, 90, 0.3);
+    }
+
+    .start-btn .en {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    .btn-arrow {
+      width: 16px;
+      height: 16px;
+      stroke: #0a0e13;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    /* 装饰线 */
+    .deco-line {
+      position: absolute;
+      top: 120px;
+      right: 8%;
+      width: 1px;
+      height: 200px;
+      background: linear-gradient(to bottom, rgba(201, 184, 160, 0.2), transparent);
+      z-index: 2;
+    }
+
+    /* 噪点纹理，增加质感 */
+    .noise {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      z-index: 1;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* 响应式：平板或窄屏下调整面板内边距和字体大小 */
+    @media (max-width: 1200px) {
+      :root {
+        --panel-width: 45%;
+      }
+
+      .right-panel {
+        padding: 80px 36px 140px 40px;
+      }
+
+      .title-big {
+        font-size: 32px;
+      }
+
+      .title-mid {
+        font-size: 24px;
+      }
+
+      .title-small {
+        font-size: 18px;
+      }
+
+      .chapter-number {
+        font-size: 48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-layer"></div>
+  <div class="noise"></div>
+  <div class="deco-line"></div>
+
+  <!-- 顶部栏：包含左侧菜单图标和右侧资源显示 -->
+  <div class="top-bar">
+    <div class="top-left">
+      <button class="icon-btn"><svg viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6" />
+        </svg></button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+        </svg></button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24">
+          <path
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg></button>
+    </div>
+    <div class="top-right">
+      <div class="resource-group">
+        <div class="resource-item">
+          <svg class="resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+          <span>7h</span>
+        </div>
+        <div class="resource-item">
+          <svg class="resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
+          <span>235</span>
+        </div>
+        <button class="icon-btn" style="width: 28px; height: 28px; margin-left: 4px;"><svg viewBox="0 0 24 24"
+            style="width: 14px; height: 14px;">
+            <path d="M12 5v14M5 12h14" />
+          </svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧详情面板：动态显示当前选中章节的详细内容 -->
+  <div class="right-panel" id="rightPanel">
+    <div class="panel-content" id="panelContent"></div>
+  </div>
+
+  <!-- 开始行动按钮：点击后跳转到对应章节的链接 -->
+  <button class="start-btn" id="startBtn">
+    <span>开始行动</span>
+    <span class="en">START</span>
+    <svg class="btn-arrow" viewBox="0 0 24 24">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  </button>
+
+  <!-- 底部时间线容器：水平滚动章节列表 -->
+  <div class="timeline-container" id="timelineContainer">
+    <div class="timeline-track" id="timelineTrack">
+      <div class="timeline-ruler"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 【配置区域】所有章节数据集中在此维护
+    // 每个章节包含：id、编号、标题文字块（支持不同大小）、副标题、描述、时间戳、跳转链接
+    // ============================================================
+    const CHAPTERS = [
+      { id: '01', label: '01ST', number: '01', titleParts: [{ text: '冬日', size: 'big' }, { text: '温暖', size: 'mid' }], subtitle: 'WINTER WARMTH', desc: '温暖来自一日的早晨。', time: '04/11 03:50', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '02', label: '02ND', number: '02', titleParts: [{ text: '就让', size: 'big' }, { text: '往事', size: 'small' }, { text: '如烟', size: 'mid' }, { text: '散', size: 'small' }], subtitle: 'LET THE PAST FADE', desc: '回首向来萧瑟处，归去，也无风雨也无晴。', time: '04/13 04:17', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '03', label: '03RD', number: '03', titleParts: [{ text: '烟雨', size: 'big' }], subtitle: 'MISTY RAIN', desc: '雨是一种赐下来的甘霖。', time: '04/16 04:30', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '04', label: '04TH', number: '04', titleParts: [{ text: '名为', size: 'big' }, { text: '水平线', size: 'mid' }], subtitle: 'THE HORIZON', desc: '故事始于二零二六的春天。', time: '04/17 05:00', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '05', label: '05TH', number: '05', titleParts: [{ text: '礼物', size: 'big' }], subtitle: 'THE GIFT', desc: '心爱无言，情意无声。', time: '04/19 05:30', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '06', label: '06TH', number: '06', titleParts: [{ text: '杨絮', size: 'big' }], subtitle: 'WILLOW FLUFF', desc: '椅子上，两人相互依靠。', time: '04/20 06:00', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '07', label: '07TH', number: '07', titleParts: [{ text: '光影', size: 'big' }], subtitle: 'LIGHT AND SHADOW', desc: '当光出现，影子便有了形状。', time: '04/22 06:30', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '08', label: '08TH', number: '08', titleParts: [{ text: '伞', size: 'big' }, { text: '与节', size: 'mid' }], subtitle: 'THE UMBREALLA AND THE KNOT', desc: '时代不需要纪念，而人们需要。', time: '03/18 07:00', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' },
+      { id: '08', label: '08TH', number: '09', titleParts: [{ text: '空山', size: 'big' }, { text: '新雨后', size: 'mid' }], subtitle: 'FRESH RAIN EMPTY HILLS', desc: '天地缓缓，浮生漫漫。', time: '03/18 07:00', url: 'https://www.bilibili.com/video/BV1yJoxB9Eou/?spm_id_from=333.1391.0.0&vd_source=e9f7309d1d5598dfd1df90a9956aa170' }
+    ];
+
+    const ITEM_WIDTH = 240;            // 每个时间线项的宽度（px），与CSS变量保持一致
+    const PANEL_WIDTH_RATIO = 0.38;    // 右侧面板宽度占比，用于计算滚动目标位置
+    let activeIndex = 1;               // 当前激活的章节索引（从0开始，初始为1即第二个章节）
+
+    // ============================================================
+    // 初始化函数
+    // ============================================================
+    function init() {
+      renderTimeline();                // 渲染时间线列表
+      renderPanel(activeIndex);       // 渲染右侧面板内容
+      setupStartButton();             // 设置开始按钮的点击事件
+      setTimeout(() => {
+        // 延迟后激活面板和按钮的显示动画
+        document.getElementById('rightPanel').classList.add('active');
+        document.getElementById('startBtn').classList.add('visible');
+        updateTimelineState(activeIndex);   // 更新时间线高亮状态
+        scrollToActive(activeIndex, false); // 滚动到当前激活章节（无动画）
+      }, 300);
+    }
+
+    // ============================================================
+    // 设置开始行动按钮的点击跳转事件
+    // ============================================================
+    function setupStartButton() {
+      const startBtn = document.getElementById('startBtn');
+      startBtn.addEventListener('click', () => {
+        const currentChapter = CHAPTERS[activeIndex];
+        if (currentChapter && currentChapter.url) {
+          window.open(currentChapter.url, '_blank');
+        }
+      });
+    }
+
+    // ============================================================
+    // 渲染时间线：根据CHAPTERS动态生成DOM元素，并绑定点击事件
+    // ============================================================
+    function renderTimeline() {
+      const track = document.getElementById('timelineTrack');
+      const ruler = track.querySelector('.timeline-ruler'); // 保留原有的标尺元素
+      track.innerHTML = '';           // 清空轨道
+      track.appendChild(ruler);       // 重新添加标尺
+
+      CHAPTERS.forEach((ch, idx) => {
+        const item = document.createElement('div');
+        item.className = 'timeline-item' + (idx === activeIndex ? ' active' : '');
+        item.dataset.index = idx;
+        // 内部HTML：包含数字、星星图标、标题、副标题、时间
+        item.innerHTML = `
+          <div class="timeline-number">
+            ${ch.number}
+            <svg class="star-icon" viewBox="0 0 24 24" style="fill:${idx === activeIndex ? 'var(--accent)' : '#8a8a8a'}">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <div class="timeline-title">${ch.titleParts.map(p => p.text).join('')}</div>
+          <div class="timeline-sub">${ch.subtitle}</div>
+          <div class="timeline-time">${ch.time}</div>
+        `;
+        item.addEventListener('click', () => onChapterClick(idx));
+        track.appendChild(item);
+      });
+    }
+
+    // ============================================================
+    // 渲染右侧面板：根据当前激活章节，动态生成详细内容
+    // ============================================================
+    function renderPanel(index) {
+      const ch = CHAPTERS[index];
+      const panel = document.getElementById('panelContent');
+      // 根据 titleParts 生成不同大小的标题span
+      const titleHTML = ch.titleParts.map(part => {
+        const cls = part.size === 'big' ? 'title-big' : part.size === 'mid' ? 'title-mid' : 'title-small';
+        return `<span class="${cls}">${part.text}</span>`;
+      }).join('');
+      panel.innerHTML = `
+        <div class="chapter-meta">
+          <span class="chapter-label">${ch.label}</span>
+          <span class="chapter-number">${ch.number}</span>
+        </div>
+        <h1 class="chapter-title">${titleHTML}</h1>
+        <div class="chapter-subtitle">${ch.subtitle}</div>
+        <p class="chapter-desc">${ch.desc}</p>
+        <div class="no-reward"><span>NO REWARD</span></div>
+      `;
+    }
+
+    // ============================================================
+    // 章节点击处理函数
+    // ============================================================
+    function onChapterClick(index) {
+      if (index === activeIndex) return;          // 如果点击的是当前章节，不做任何变化
+      activeIndex = index;
+      updateTimelineState(index);                 // 更新时间线的高亮和变暗状态
+      scrollToActive(index, true);                // 平滑滚动到新章节位置
+
+      // 面板和开始按钮先淡出隐藏
+      const rightPanel = document.getElementById('rightPanel');
+      const startBtn = document.getElementById('startBtn');
+      rightPanel.classList.remove('active');
+      startBtn.classList.remove('visible');
+
+      // 延迟后重新渲染新内容并滑入
+      setTimeout(() => {
+        renderPanel(index);
+        rightPanel.classList.add('active');
+        startBtn.classList.add('visible');
+      }, 400);
+    }
+
+    // ============================================================
+    // 更新时间线上所有项的样式：激活项高亮，非激活项变暗（dimmed）
+    // ============================================================
+    function updateTimelineState(activeIdx) {
+      document.querySelectorAll('.timeline-item').forEach((item, idx) => {
+        item.classList.remove('active', 'dimmed');
+        const star = item.querySelector('.star-icon');
+        if (star) star.style.fill = idx === activeIdx ? 'var(--accent)' : '#8a8a8a';
+        item.classList.add(idx === activeIdx ? 'active' : 'dimmed');
+      });
+    }
+
+    // ============================================================
+    // 智能滚动定位函数
+    // 目标：将当前激活的章节滚动到"左侧可见区域"的正中央。
+    // 左侧可见区域 = 屏幕左边缘 到 右侧面板左边缘之间的区域。
+    // 正中央 = 该区域宽度的一半。
+    // 原理：计算该章节中心点相对于轨道的位置，然后设置容器scrollLeft使该中心点位于目标位置。
+    // 注意：右侧内边距（padding-right）足够大，确保最后一个章节也能滚动到目标位置。
+    // ============================================================
+    function scrollToActive(index, smooth) {
+      const container = document.getElementById('timelineContainer');
+      const screenW = window.innerWidth;
+      const panelLeftEdge = screenW * PANEL_WIDTH_RATIO;   // 右侧面板的左边缘坐标
+
+      // 左侧可见区域的中心点坐标（相对于屏幕）
+      const targetCenterX = panelLeftEdge * 0.5;
+
+      // 当前激活章节的中心点在轨道中的绝对位置（每个项宽度固定，索引 * 宽度 + 一半宽度）
+      const itemCenterInTrack = index * ITEM_WIDTH + ITEM_WIDTH / 2;
+
+      // 需要滚动到的位置 = 章节中心位置 - 目标中心位置
+      let targetScroll = itemCenterInTrack - targetCenterX;
+
+      // 最小滚动限制：不能小于0，防止左侧出现空白
+      const minScroll = 0;
+      targetScroll = Math.max(minScroll, targetScroll);
+
+      // 不设最大滚动限制，因为轨道右侧内边距足够大，自然能滚动到最右侧
+      container.scrollTo({ left: targetScroll, behavior: smooth ? 'smooth' : 'auto' });
+    }
+
+    // ============================================================
+    // 鼠标拖拽滚动时间线（模拟可拖拽的横向滚动区域）
+    // ============================================================
+    const timelineContainer = document.getElementById('timelineContainer');
+    let isDown = false, startX, scrollLeft;
+
+    timelineContainer.addEventListener('mousedown', (e) => {
+      isDown = true;
+      timelineContainer.style.cursor = 'grabbing';
+      startX = e.pageX - timelineContainer.offsetLeft;
+      scrollLeft = timelineContainer.scrollLeft;
+    });
+    timelineContainer.addEventListener('mouseleave', () => { isDown = false; timelineContainer.style.cursor = 'grab'; });
+    timelineContainer.addEventListener('mouseup', () => { isDown = false; timelineContainer.style.cursor = 'grab'; });
+    timelineContainer.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - timelineContainer.offsetLeft;
+      // 移动速度系数2，使拖拽更灵敏
+      timelineContainer.scrollLeft = scrollLeft - (x - startX) * 2;
+    });
+
+    // ============================================================
+    // 背景视差效果：跟随鼠标轻微移动背景层，增强沉浸感
+    // ============================================================
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 10;
+      document.querySelector('.bg-layer').style.transform =
+        `translate(${x * 0.5}px, ${y * 0.5}px) scale(1.02)`;
+    });
+
+    // 启动整个应用
+    init();
+  </script>
+</body>
+
+</html>
