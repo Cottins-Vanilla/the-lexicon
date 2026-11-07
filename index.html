@@ -538,24 +538,26 @@
           <input type="file" id="musicInput" accept="audio/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.webm,.opus" multiple hidden>
         </div>
 
-        <div class="music-picker" id="musicPicker" hidden>
-          <div class="music-picker-head">
-            <div>
-              <span class="music-picker-kicker">ARCHIVE PLAYLIST</span>
-              <strong>唱片架</strong>
-              <span class="music-picker-count" id="musicLibraryCount">0 首</span>
+        <div class="music-picker" id="musicPicker" aria-hidden="true" inert>
+          <div class="music-picker-inner">
+            <div class="music-picker-head">
+              <div>
+                <span class="music-picker-kicker">ARCHIVE PLAYLIST</span>
+                <strong>唱片架</strong>
+                <span class="music-picker-count" id="musicLibraryCount">0 首</span>
+              </div>
+              <button type="button" class="music-picker-close" id="musicPickerClose" aria-label="收起选择栏" title="收起选择栏">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+              </button>
             </div>
-            <button type="button" class="music-picker-close" id="musicPickerClose" aria-label="收起选择栏" title="收起选择栏">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
-            </button>
-          </div>
-          <div class="music-library" id="musicLibrary" role="listbox" aria-label="音乐文件"></div>
-          <div class="music-picker-foot">
-            <span class="music-picker-note" id="musicLibraryNote">music/ 文件夹中的音乐</span>
-            <button type="button" class="choose-music import-music" id="importMusicBtn">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-              导入音乐
-            </button>
+            <div class="music-library" id="musicLibrary" role="listbox" aria-label="音乐文件"></div>
+            <div class="music-picker-foot">
+              <span class="music-picker-note" id="musicLibraryNote">music/ 文件夹中的音乐</span>
+              <button type="button" class="choose-music import-music" id="importMusicBtn">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                导入音乐
+              </button>
+            </div>
           </div>
         </div>
 

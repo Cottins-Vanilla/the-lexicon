@@ -409,7 +409,7 @@
         : '导入 · ' + formatFileSize(track.size);
       const badge = selected ? '当前' : (isFolder ? '目录' : '导入');
       return `
-        <button type="button" class="music-choice${selected ? ' is-selected' : ''}" data-track-id="${escapeHtml(track.id)}" role="option" aria-selected="${selected}">
+        <button type="button" class="music-choice${selected ? ' is-selected' : ''}" data-track-id="${escapeHtml(track.id)}" role="option" aria-selected="${selected}" style="--i:${index}">
           <span class="music-choice-index">${String(index + 1).padStart(2, '0')}</span>
           <span class="music-choice-main">
             <span class="music-choice-title">${escapeHtml(track.title)}</span>
@@ -606,11 +606,20 @@
 
   function setMusicPicker(open) {
     if (!els || !els.musicPicker) return;
-    els.musicPicker.hidden = !open;
-    els.chooseMusicBtn.setAttribute('aria-expanded', String(Boolean(open)));
-    els.chooseMusicBtn.classList.toggle('is-open', Boolean(open));
+    const isOpen = Boolean(open);
+    if (isOpen) renderMusicLibrary();
+    els.musicPicker.classList.toggle('is-open', isOpen);
+    els.musicPicker.setAttribute('aria-hidden', String(!isOpen));
+    if (isOpen) {
+      els.musicPicker.removeAttribute('inert');
+    } else {
+      els.musicPicker.setAttribute('inert', '');
+      if (els.musicPicker.contains(document.activeElement)) els.chooseMusicBtn.focus();
+    }
+    els.chooseMusicBtn.setAttribute('aria-expanded', String(isOpen));
+    els.chooseMusicBtn.classList.toggle('is-open', isOpen);
     const label = els.chooseMusicBtn.querySelector('span');
-    if (label) label.textContent = open ? '收起选择' : '选择音乐';
+    if (label) label.textContent = isOpen ? '收起选择' : '选择音乐';
   }
 
   function openMusicDialog() {
@@ -807,8 +816,8 @@
     });
 
     els.chooseMusicBtn.addEventListener('click', function () {
-      setMusicPicker(els.musicPicker.hidden);
-      if (!els.musicPicker.hidden) renderMusicLibrary();
+      const opening = !els.musicPicker.classList.contains('is-open');
+      setMusicPicker(opening);
     });
 
     els.musicPickerClose.addEventListener('click', function () {
@@ -835,6 +844,7 @@
       if (!choice) return;
       if (selectMusicTrack(choice.dataset.trackId, { play: true })) {
         setMusicPicker(false);
+        els.chooseMusicBtn.focus();
       }
     });
 
