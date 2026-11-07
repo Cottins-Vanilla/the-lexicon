@@ -527,12 +527,36 @@
         <div class="music-track" id="musicTrack">
           <div class="record-disc" aria-hidden="true"></div>
           <div class="track-info">
-            <span class="track-label">LOCAL RECORD</span>
+            <span class="track-label" id="trackLabel">LOCAL RECORD</span>
             <strong class="track-name" id="trackName">尚未放入唱片</strong>
-            <span class="track-meta" id="trackMeta">选择或拖入本地音频</span>
+            <span class="track-meta" id="trackMeta">从 music/ 选择或导入本地音频</span>
           </div>
-          <button type="button" class="choose-music" id="chooseMusicBtn">选择音乐</button>
-          <input type="file" id="musicInput" accept="audio/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.webm,.opus" hidden>
+          <button type="button" class="choose-music" id="chooseMusicBtn" aria-expanded="false" aria-controls="musicPicker">
+            <span>选择音乐</span>
+            <svg class="choose-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <input type="file" id="musicInput" accept="audio/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.webm,.opus" multiple hidden>
+        </div>
+
+        <div class="music-picker" id="musicPicker" hidden>
+          <div class="music-picker-head">
+            <div>
+              <span class="music-picker-kicker">ARCHIVE PLAYLIST</span>
+              <strong>唱片架</strong>
+              <span class="music-picker-count" id="musicLibraryCount">0 首</span>
+            </div>
+            <button type="button" class="music-picker-close" id="musicPickerClose" aria-label="收起选择栏" title="收起选择栏">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+            </button>
+          </div>
+          <div class="music-library" id="musicLibrary" role="listbox" aria-label="音乐文件"></div>
+          <div class="music-picker-foot">
+            <span class="music-picker-note" id="musicLibraryNote">music/ 文件夹中的音乐</span>
+            <button type="button" class="choose-music import-music" id="importMusicBtn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              导入音乐
+            </button>
+          </div>
         </div>
 
         <div class="music-playbar">
@@ -558,10 +582,10 @@
 
         <div class="music-extras">
           <label class="loop-control"><input type="checkbox" id="musicLoop" checked> 循环播放</label>
-          <button type="button" class="clear-music" id="clearMusicBtn" disabled>移除音乐</button>
+          <button type="button" class="clear-music" id="clearMusicBtn" disabled>清除当前选择</button>
         </div>
 
-        <p class="music-help">音乐文件只留在本机，不会上传；刷新页面后需要重新选择。<br>音效总开关在页面右上角的扬声器按钮。</p>
+        <p class="music-help">目录唱片与导入音乐都只留在本机，不会上传；选中的唱片会被记住，下次打开自动恢复。<br>音效总开关在页面右上角的扬声器按钮。</p>
       </div>
     </div>
   </dialog>

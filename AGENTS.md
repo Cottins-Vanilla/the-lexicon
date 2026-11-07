@@ -17,8 +17,10 @@
 - `scripts/seed.js` — 首次启动写入的内置文件夹、单词本和词条。
 - `scripts/art.js` — 按固定种子生成文件夹与单词本的 SVG 几何封面。
 - `scripts/store.js` — `localStorage` 读写、v1 数据迁移、排序队列和增删改查。
-- `scripts/audio.js` — Web Audio 合成音效、本地音频播放和音量偏好。
+- `scripts/audio.js` — Web Audio 合成音效、目录/导入唱片播放、选择栏和音乐偏好。
 - `scripts/app.js` — 页面渲染、事件绑定、视图切换、搜索、词条管理和确认流程。
+- `music/archive-waltz.wav` — 内置目录唱片：档案圆舞曲。
+- `music/night-rain.wav` — 内置目录唱片：夜航雨声。
 - `README.md` — 面向使用者的功能、流程、数据结构和快捷键说明。
 - `.gitignore` — Git 忽略规则，排除截图、依赖、日志和临时文件。
 - `入口.html` — 最初的设计参考页，不属于应用，也不被 `index.html` 加载。
@@ -29,7 +31,7 @@
 - 主数据只存 `localStorage` 的 `word-lexicon-v3`，结构包含 `folders`、`books`、`activity`、`ui`；不得改键名或结构而不写迁移。
 - 当缺少 `word-lexicon-v3` 且存在 `word-lexicon-v1` 时，首次打开必须自动迁移：内置词状态、旧 `customWords`（写入“私人词匣”的“我的词条”）和旧记录中的“依稀/未识”；保留 v1 键，不删除。
 - 纯静态：页面必须能在 `file://` 下直接运行，不得依赖服务端接口、构建产物或本地服务器。
-- 零依赖、零网络：不得引入 npm 包、CDN、远程字体、远程图片、`fetch`、`XMLHttpRequest`、WebSocket、统计或第三方 API；本地音乐只用 Blob URL 播放。
+- 零依赖、零网络：不得引入 npm 包、CDN、远程字体、远程图片、`fetch`、`XMLHttpRequest`、WebSocket、统计或第三方 API；目录音乐用 `music/` 相对路径，导入音乐存 IndexedDB 的 `word-lexicon-music-library` 并仅用 Blob URL 播放；选中项存 `word-lexicon-music-selected-v1`。
 - 加载方式保持普通静态资源：CSS 用 `<link>`，JS 用普通 `<script src>`；不要改成 ES module 或 `import`，否则 `file://` 可能被浏览器 CORS 拦截。
 - 字体只使用系统字体栈（`styles/base.css` 中的 `--display`、`--quote`、`--cn`、`--label`、`--mono`）；不得添加远程 `@font-face`。
 - 记诵逻辑保持现行规则：队列排除 `status === 'known'`，按 `fuzzy` → `unknown` → `new` 排序；点“斩”后词条移出队列且不写入 `activity`。
