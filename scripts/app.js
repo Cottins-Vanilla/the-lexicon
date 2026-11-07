@@ -16,6 +16,7 @@
     unknown: { label: '未识', tag: 'AGAIN · 未识', className: 'is-unknown' },
     known: { label: '已斩', tag: 'KNOWN · 已斩', className: 'is-known' }
   };
+  const STATUS_ORDER = ['new', 'fuzzy', 'unknown', 'known'];
 
   const ICONS = {
     trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V5h6v2M7 7l.8 12h8.4L17 7"/><path d="M10 10.5v5M14 10.5v5"/></svg>',
@@ -1227,9 +1228,11 @@
 
     els.manageList.innerHTML = words.map(function (word) {
       const meta = STATUS_META[word.status] || STATUS_META.new;
-      const reset = word.status === 'known'
-        ? '<button type="button" class="mini-action" data-action="reset-word" data-word-id="' + escapeAttr(word.id) + '" title="重新加入复习" aria-label="重新加入复习">' + ICONS.reset + '</button>'
-        : '';
+      const statusMenuId = 'status-options-' + escapeAttr(word.id);
+      const statusOptions = STATUS_ORDER.map(function (status, index) {
+        const option = STATUS_META[status];
+        return `<button type="button" class="status-option${word.status === status ? ' is-current' : ''}" data-action="set-status" data-word-id="${escapeAttr(word.id)}" data-status="${status}" style="--i:${index}" aria-pressed="${word.status === status}">${option.label}</button>`;
+      }).join('');
       return `
         <article class="manage-row">
           <div class="manage-main">
@@ -1242,13 +1245,86 @@
             ${word.sentence ? '<p class="manage-sentence">' + escapeHtml(word.sentence) + '</p>' : ''}
           </div>
           <div class="manage-side">
-            <span class="status-chip ${meta.className}">${meta.label}</span>
-            ${reset}
+            <button type="button" class="status-chip status-toggle ${meta.className}" data-action="toggle-status" data-word-id="${escapeAttr(word.id)}" aria-expanded="false" aria-controls="${statusMenuId}" aria-haspopup="true" title="更换词条状态">
+              <span>${meta.label}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
             <button type="button" class="mini-action is-delete" data-action="delete-word" data-word-id="${escapeAttr(word.id)}" title="删除词条" aria-label="删除词条 ${escapeAttr(word.word)}">${ICONS.trash}</button>
+          </div>
+          <div class="status-options" id="${statusMenuId}" data-word-id="${escapeAttr(word.id)}" role="group" aria-label="更换 ${escapeAttr(word.word)} 的状态" aria-hidden="true" inert>
+            <div class="status-options-inner">${statusOptions}</div>
           </div>
         </article>
       `;
     }).join('');
+  }
+
+  function setStatusMenuOpen(menu, open) {
+    if (!menu) return;
+    const row = menu.closest('.manage-row');
+    const toggle = row ? row.querySelector('[data-action="toggle-status"]') : null;
+    const isOpen = Boolean(open);
+    menu.classList.toggle('is-open', isOpen);
+    menu.setAttribute('aria-hidden', String(!isOpen));
+    if (isOpen) menu.removeAttribute('inert');
+    else menu.setAttribute('inert', '');
+    if (toggle) {
+      toggle.classList.toggle('is-open', isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+    if (!isOpen && menu.contains(document.activeElement) && toggle) toggle.focus();
+  }
+
+  function closeAllStatusMenus(exceptWordId) {
+    if (!els || !els.manageList) return;
+    els.manageList.querySelectorAll('.status-options.is-open').forEach(function (menu) {
+      if (exceptWordId && menu.dataset.wordId === exceptWordId) return;
+      setStatusMenuOpen(menu, false);
+    });
+  }
+
+  function findStatusToggle(wordId) {
+    if (!els || !els.manageList) return null;
+    return Array.from(els.manageList.querySelectorAll('[data-action="toggle-status"]')).find(function (button) {
+      return button.dataset.wordId === wordId;
+    }) || null;
+  }
+
+  function changeWordStatus(bookId, wordId, status) {
+    const book = Store.getBook(bookId);
+    const word = book && book.words.find(function (item) { return item.id === wordId; });
+    const meta = STATUS_META[status];
+    if (!book || !word || !meta) return;
+    if (word.status === status) {
+      closeAllStatusMenus();
+      const currentToggle = findStatusToggle(wordId);
+      if (currentToggle) currentToggle.focus();
+      return;
+    }
+
+    const updated = Store.setWordStatus(bookId, wordId, status);
+    if (!updated) {
+      showToast('状态更新失败，请重试。', 'error');
+      return;
+    }
+
+    renderManage();
+    refreshStudyAfterWordMutation(bookId, wordId);
+    updateLibraryStats();
+    Lexicon.Audio && Lexicon.Audio.playSelect();
+
+    const suffix = status === 'known'
+      ? '，已移出复习队列'
+      : (status === 'new' ? '，已重新加入复习队列' : '');
+    showToast('状态已更新 · ' + meta.label + suffix);
+
+    window.requestAnimationFrame(function () {
+      const toggle = findStatusToggle(wordId);
+      if (!toggle) return;
+      toggle.focus();
+      toggle.classList.add('is-updating');
+      window.setTimeout(function () { toggle.classList.remove('is-updating'); }, 480);
+    });
   }
 
   function handleManageAction(event) {
@@ -1258,13 +1334,24 @@
     const wordId = button.dataset.wordId;
     if (!bookId || !wordId) return;
 
-    if (button.dataset.action === 'reset-word') {
-      Store.resetWord(bookId, wordId);
-      renderManage();
-      refreshStudyAfterWordMutation(bookId);
-      updateLibraryStats();
-      showToast('词条已重新加入复习队列。');
-      Lexicon.Audio && Lexicon.Audio.playSelect();
+    if (button.dataset.action === 'toggle-status') {
+      const row = button.closest('.manage-row');
+      const menu = row ? row.querySelector('.status-options') : null;
+      if (!menu) return;
+      const opening = !menu.classList.contains('is-open');
+      if (!opening) {
+        setStatusMenuOpen(menu, false);
+        return;
+      }
+      closeAllStatusMenus(menu.dataset.wordId);
+      setStatusMenuOpen(menu, true);
+      const current = menu.querySelector('.status-option.is-current') || menu.querySelector('.status-option');
+      if (current) current.focus();
+      return;
+    }
+
+    if (button.dataset.action === 'set-status') {
+      changeWordStatus(bookId, wordId, button.dataset.status);
       return;
     }
 
@@ -1522,6 +1609,20 @@
     });
     els.manageAddBtn.addEventListener('click', function () { openEntryDialog(ui.manageBookId); });
     els.manageList.addEventListener('click', handleManageAction);
+    els.manageList.addEventListener('keydown', function (event) {
+      if (event.key !== 'Escape') return;
+      const openMenu = els.manageList.querySelector('.status-options.is-open');
+      if (!openMenu) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const toggle = openMenu.closest('.manage-row')?.querySelector('[data-action="toggle-status"]');
+      setStatusMenuOpen(openMenu, false);
+      if (toggle) toggle.focus();
+    });
+    els.manageDialog.addEventListener('close', function () { closeAllStatusMenus(); });
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('.status-toggle, .status-options')) closeAllStatusMenus();
+    });
     els.manageExportBtn.addEventListener('click', exportManageBook);
     els.exportBtn.addEventListener('click', exportAllData);
 

@@ -124,7 +124,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: 12px;
+  column-gap: 12px;
+  row-gap: 0;
   padding: 15px 0;
   border-bottom: 1px solid rgba(203, 188, 163, .08);
 }
@@ -195,12 +196,46 @@
   min-width: 42px;
   padding: 4px 7px;
   border: 1px solid var(--line);
+  background: transparent;
   font-family: var(--cn);
   font-size: 9.5px;
   line-height: 1;
   letter-spacing: .04em;
   color: var(--muted);
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.status-toggle {
+  gap: 4px;
+  transition: border-color .25s var(--ease), background .25s var(--ease), color .25s var(--ease), transform .25s var(--ease);
+}
+
+.status-toggle:hover {
+  border-color: rgba(203, 188, 163, .42);
+  background: rgba(234, 226, 212, .055);
+}
+
+.status-toggle.is-open {
+  border-color: rgba(199, 176, 139, .48);
+  background: rgba(199, 176, 139, .08);
+}
+
+.status-toggle svg {
+  width: 8px;
+  height: 8px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  transition: transform .3s var(--ease-out);
+}
+
+.status-toggle.is-open svg {
+  transform: rotate(180deg);
+}
+
+.status-toggle.is-updating {
+  animation: statusChipPop .44s var(--ease-out);
 }
 
 .status-chip.is-fuzzy {
@@ -223,6 +258,112 @@
 .status-chip.is-new {
   border-color: rgba(127, 158, 154, .27);
   color: var(--verdigris);
+}
+
+.status-options {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-top: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    grid-template-rows .34s cubic-bezier(.22, 1, .36, 1),
+    margin-top .34s cubic-bezier(.22, 1, .36, 1),
+    opacity .18s var(--ease),
+    visibility 0s linear .34s;
+}
+
+.status-options.is-open {
+  grid-template-rows: 1fr;
+  margin-top: 8px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    grid-template-rows .34s cubic-bezier(.22, 1, .36, 1),
+    margin-top .34s cubic-bezier(.22, 1, .36, 1),
+    opacity .24s var(--ease),
+    visibility 0s linear 0s;
+}
+
+.status-options-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.status-options.is-open .status-option {
+  animation: statusOptionIn .28s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 22ms + 30ms);
+}
+
+.status-option {
+  min-height: 27px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  background: rgba(234, 226, 212, .018);
+  color: var(--muted);
+  font-family: var(--cn);
+  font-size: 9.5px;
+  line-height: 1;
+  letter-spacing: .04em;
+  transition: border-color .22s var(--ease), background .22s var(--ease), color .22s var(--ease);
+}
+
+.status-option:hover {
+  border-color: rgba(203, 188, 163, .43);
+  background: rgba(234, 226, 212, .06);
+  color: var(--paper);
+}
+
+.status-option[data-status="new"] {
+  color: var(--verdigris);
+}
+
+.status-option[data-status="fuzzy"] {
+  color: var(--gold);
+}
+
+.status-option[data-status="unknown"] {
+  color: var(--paper-soft);
+}
+
+.status-option[data-status="known"] {
+  color: var(--rust-bright);
+}
+
+.status-option.is-current {
+  border-color: rgba(199, 176, 139, .5);
+  background: rgba(199, 176, 139, .1);
+  color: var(--paper);
+  box-shadow: inset 2px 0 var(--gold-soft);
+}
+
+@keyframes statusOptionIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes statusChipPop {
+  0% {
+    transform: scale(.94);
+  }
+  55% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .mini-action {
@@ -1041,9 +1182,14 @@
   }
 
   .manage-side {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
-    max-width: 78px;
+    max-width: 112px;
+  }
+
+  .status-option {
+    min-height: 29px;
+    font-size: 10px;
   }
 
   .manage-sentence {
