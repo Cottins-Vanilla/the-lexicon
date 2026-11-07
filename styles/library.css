@@ -526,13 +526,19 @@
   background: rgba(6, 9, 11, .62);
   color: rgba(234, 226, 212, .38);
   opacity: 0;
+  pointer-events: none;
   transition: opacity .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
 
 .folder-card:hover .card-menu,
 .folder-card.is-active .card-menu,
+.book-card:hover .card-menu,
 .card-menu:focus-visible {
   opacity: 1;
+  pointer-events: auto;
+  border-color: rgba(234, 226, 212, .24);
+  background: rgba(6, 9, 11, .84);
+  color: rgba(234, 226, 212, .72);
 }
 
 .card-menu:hover {
@@ -551,6 +557,7 @@
 @media (hover: none) {
   .card-menu {
     opacity: 1;
+    pointer-events: auto;
     width: 28px;
     height: 28px;
   }
@@ -632,7 +639,7 @@
   z-index: 3;
   top: 13px;
   left: 14px;
-  right: 14px;
+  right: 46px;
   display: flex;
   align-items: center;
   justify-content: space-between;
