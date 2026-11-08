@@ -21,6 +21,7 @@
   const ICONS = {
     trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V5h6v2M7 7l.8 12h8.4L17 7"/><path d="M10 10.5v5M14 10.5v5"/></svg>',
     reset: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 11a7.5 7.5 0 111.9 5.1M4.5 5.5V11H10"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 5.5l4 4"/></svg>',
     plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'
   };
 
@@ -40,6 +41,7 @@
     manageBookId: '',
     manageSearch: '',
     entryBookId: '',
+    entryWordId: '',
     libScrollTop: 0,
     busy: false,
     emptyPrimaryMode: 'add',
@@ -131,7 +133,12 @@
 
       entryDialog: $('entryDialog'),
       entryForm: $('entryForm'),
+      entryDialogTitle: $('entryDialogTitle'),
       entryBookLabel: $('entryBookLabel'),
+      entryKicker: $('entryKicker'),
+      entryCloseBtn: $('entryCloseBtn'),
+      entrySubmitBtn: $('entrySubmitBtn'),
+      entryNote: $('entryNote'),
       entryWord: $('entryWord'),
 
       manageDialog: $('manageDialog'),
@@ -772,18 +779,48 @@
      词条新增
      ===================================================== */
 
-  function openEntryDialog(bookId) {
+  function openEntryDialog(bookId, wordId) {
     const book = Store.getBook(bookId);
     if (!book) {
       showToast('单词本不存在了。', 'error');
       return;
     }
+    const editingWord = wordId
+      ? book.words.find(function (word) { return word.id === wordId; })
+      : null;
+    if (wordId && !editingWord) {
+      showToast('词条不存在了。', 'error');
+      return;
+    }
+
+    const editing = Boolean(editingWord);
     ui.entryBookId = bookId;
+    ui.entryWordId = editingWord ? editingWord.id : '';
     els.entryForm.reset();
     resetFieldErrors(els.entryForm);
-    els.entryBookLabel.textContent = '收入《' + book.name + '》';
+    els.entryKicker.textContent = editing ? 'EDIT WORD' : 'NEW WORD';
+    els.entryDialogTitle.textContent = editing ? '编辑词条' : '新增词条';
+    els.entryBookLabel.textContent = editing
+      ? '修改《' + book.name + '》中的词条'
+      : '收入《' + book.name + '》';
+    els.entryCloseBtn.setAttribute('aria-label', editing ? '关闭编辑词条' : '关闭新增词条');
+    els.entrySubmitBtn.textContent = editing ? '保存修改' : '收入词匣';
+    els.entryNote.textContent = editing
+      ? '保存后会更新当前词条。所有内容只保存在本机。'
+      : '保存后会加入当前单词本。所有内容只保存在本机。';
+
+    if (editingWord) {
+      ['word', 'phonetic', 'pos', 'meaning', 'sentence', 'translation', 'source'].forEach(function (name) {
+        const field = els.entryForm.elements.namedItem(name);
+        if (field) field.value = editingWord[name] || '';
+      });
+    }
+
     openDialog(els.entryDialog);
-    window.setTimeout(function () { els.entryWord.focus(); }, 80);
+    window.setTimeout(function () {
+      els.entryWord.focus();
+      if (editing) els.entryWord.select();
+    }, 80);
     Lexicon.Audio && Lexicon.Audio.playSelect();
   }
 
@@ -821,7 +858,9 @@
       return;
     }
 
-    const result = Store.addWord(book.id, values);
+    const result = ui.entryWordId
+      ? Store.updateWord(book.id, ui.entryWordId, values)
+      : Store.addWord(book.id, values);
     if (!result.ok) {
       if (result.message && result.message.indexOf('已经有') >= 0) {
         setFieldError(els.entryForm.elements.namedItem('word'), result.message);
@@ -831,8 +870,12 @@
       return;
     }
 
+    const wasEditing = Boolean(ui.entryWordId);
+    ui.entryWordId = '';
     closeDialog(els.entryDialog);
-    showToast('已收入《' + book.name + '》 · ' + result.word.word, 'known');
+    showToast(wasEditing
+      ? '词条已保存 · ' + result.word.word
+      : '已收入《' + book.name + '》 · ' + result.word.word, 'known');
     Lexicon.Audio && Lexicon.Audio.playOpen();
 
     if (els.manageDialog.open && ui.manageBookId === book.id) {
@@ -1249,6 +1292,7 @@
               <span>${meta.label}</span>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
             </button>
+            <button type="button" class="mini-action is-edit" data-action="edit-word" data-word-id="${escapeAttr(word.id)}" title="编辑词条" aria-label="编辑词条 ${escapeAttr(word.word)}">${ICONS.edit}</button>
             <button type="button" class="mini-action is-delete" data-action="delete-word" data-word-id="${escapeAttr(word.id)}" title="删除词条" aria-label="删除词条 ${escapeAttr(word.word)}">${ICONS.trash}</button>
           </div>
           <div class="status-options" id="${statusMenuId}" data-word-id="${escapeAttr(word.id)}" role="group" aria-label="更换 ${escapeAttr(word.word)} 的状态" aria-hidden="true" inert>
@@ -1352,6 +1396,15 @@
 
     if (button.dataset.action === 'set-status') {
       changeWordStatus(bookId, wordId, button.dataset.status);
+      return;
+    }
+
+    if (button.dataset.action === 'edit-word') {
+      const book = Store.getBook(bookId);
+      const word = book && book.words.find(function (item) { return item.id === wordId; });
+      if (!book || !word) return;
+      closeAllStatusMenus();
+      openEntryDialog(bookId, wordId);
       return;
     }
 

@@ -387,6 +387,11 @@
   color: var(--rust-bright);
 }
 
+.mini-action.is-edit:hover {
+  border-color: rgba(199, 176, 139, .35);
+  color: var(--gold);
+}
+
 .mini-action svg {
   width: 13px;
   height: 13px;
@@ -1184,7 +1189,7 @@
   .manage-side {
     flex-wrap: nowrap;
     justify-content: flex-end;
-    max-width: 112px;
+    max-width: 132px;
   }
 
   .status-option {

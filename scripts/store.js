@@ -367,6 +367,42 @@
     return { ok: true, word };
   }
 
+  function updateWord(bookId, wordId, data) {
+    const s = ensureState();
+    const book = getBook(bookId);
+    if (!book) return { ok: false, message: '单词本不存在。' };
+    const index = book.words.findIndex((item) => item.id === wordId);
+    if (index < 0) return { ok: false, message: '词条不存在。' };
+
+    const wordText = text(data && data.word, 64);
+    if (!wordText) return { ok: false, message: '请填写单词。' };
+    const duplicate = book.words.some((item) => item.id !== wordId && item.word.toLowerCase() === wordText.toLowerCase());
+    if (duplicate) return { ok: false, message: '这本单词本里已经有这个词了。' };
+
+    const current = book.words[index];
+    const updated = normalizeWord({
+      ...current,
+      word: wordText,
+      phonetic: data.phonetic,
+      pos: data.pos,
+      meaning: data.meaning,
+      sentence: data.sentence,
+      translation: data.translation,
+      source: data.source,
+      sourceZh: data.sourceZh !== undefined ? data.sourceZh : current.sourceZh
+    }, index);
+    if (!updated) return { ok: false, message: '词条内容不完整。' };
+
+    const now = new Date().toISOString();
+    book.words[index] = updated;
+    book.updatedAt = now;
+    s.activity.forEach((entry) => {
+      if (entry.bookId === book.id && entry.wordId === updated.id) entry.word = updated.word;
+    });
+    save();
+    return { ok: true, word: updated };
+  }
+
   function deleteWord(bookId, wordId) {
     const s = ensureState();
     const book = getBook(bookId);
@@ -525,6 +561,7 @@
     createBook,
     deleteBook,
     addWord,
+    updateWord,
     deleteWord,
     setWordStatus,
     resetWord,

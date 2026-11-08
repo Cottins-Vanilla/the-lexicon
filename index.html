@@ -393,11 +393,11 @@
     <div class="modal-shell entry-shell">
       <header class="modal-head">
         <div>
-          <div class="kicker"><span class="kicker-rule"></span>NEW WORD</div>
+          <div class="kicker"><span class="kicker-rule"></span><span id="entryKicker">NEW WORD</span></div>
           <h2 class="modal-title" id="entryDialogTitle">新增词条</h2>
           <p class="modal-sub" id="entryBookLabel">收入单词本</p>
         </div>
-        <button type="button" class="dialog-close" data-close aria-label="关闭新增词条">
+        <button type="button" class="dialog-close" id="entryCloseBtn" data-close aria-label="关闭新增词条">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </header>
@@ -440,10 +440,10 @@
           </label>
         </div>
         <div class="modal-actions entry-actions">
-          <p class="modal-note">保存后会加入当前单词本。所有内容只保存在本机。</p>
+          <p class="modal-note" id="entryNote">保存后会加入当前单词本。所有内容只保存在本机。</p>
           <div class="button-row">
             <button type="button" class="line-btn" data-close>取消</button>
-            <button type="submit" class="primary-btn">收入词匣</button>
+            <button type="submit" class="primary-btn" id="entrySubmitBtn">收入词匣</button>
           </div>
         </div>
       </form>
